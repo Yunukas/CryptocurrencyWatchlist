@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		101D88F0535132FF7A633E49 /* Pods_TwoScreenApp.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 179CA99A15D8FD4DD6B7CB69 /* Pods_TwoScreenApp.framework */; };
+		1D51615621EDCCCC0084CDE3 /* Constants.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D51615521EDCCCC0084CDE3 /* Constants.swift */; };
 		1D9382C021EC61E400350A3B /* Crypto.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D9382BF21EC61E400350A3B /* Crypto.swift */; };
 		1D9382C321EC6ED900350A3B /* TableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D9382C121EC6ED900350A3B /* TableViewCell.swift */; };
 		1D9382C421EC6ED900350A3B /* TableViewCell.xib in Resources */ = {isa = PBXBuildFile; fileRef = 1D9382C221EC6ED900350A3B /* TableViewCell.xib */; };
@@ -20,6 +21,7 @@
 
 /* Begin PBXFileReference section */
 		179CA99A15D8FD4DD6B7CB69 /* Pods_TwoScreenApp.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_TwoScreenApp.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		1D51615521EDCCCC0084CDE3 /* Constants.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Constants.swift; sourceTree = "<group>"; };
 		1D9382BF21EC61E400350A3B /* Crypto.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Crypto.swift; sourceTree = "<group>"; };
 		1D9382C121EC6ED900350A3B /* TableViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TableViewCell.swift; sourceTree = "<group>"; };
 		1D9382C221EC6ED900350A3B /* TableViewCell.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = TableViewCell.xib; sourceTree = "<group>"; };
@@ -76,6 +78,7 @@
 				1DE1A67A21EB331000573B93 /* Assets.xcassets */,
 				1DE1A67C21EB331000573B93 /* LaunchScreen.storyboard */,
 				1DE1A67F21EB331000573B93 /* Info.plist */,
+				1D51615521EDCCCC0084CDE3 /* Constants.swift */,
 			);
 			path = CryptocurrencyWatchlist;
 			sourceTree = "<group>";
@@ -220,6 +223,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				1D51615621EDCCCC0084CDE3 /* Constants.swift in Sources */,
 				1D9382C021EC61E400350A3B /* Crypto.swift in Sources */,
 				1D9382C321EC6ED900350A3B /* TableViewCell.swift in Sources */,
 				1DE1A67621EB330E00573B93 /* ViewController.swift in Sources */,

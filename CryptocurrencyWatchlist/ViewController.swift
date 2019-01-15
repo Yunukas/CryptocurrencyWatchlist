@@ -15,17 +15,22 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
     var cryptoList = [Crypto]()
     var cryptoNamesList : [String] = ["ETH","BTC","LTC"]
     
+    /*
+     the height constraint of the text field,
+     this is required for mocing the bottom view
+     when text field is activated and keyboard is presented
+     */
     @IBOutlet weak var addCryptoTextFieldHeight: NSLayoutConstraint!
-    
+    // the table view that lists the selected cryptos
     @IBOutlet weak var cryptoTableView: UITableView!
- 
+    // the text field at the bottom of the view, used for adding new items
     @IBOutlet weak var addNewCryptoTextField: UITextField!
-    
+    // URL of the API
     var URL = "https://min-api.cryptocompare.com/data/pricemulti?fsyms="
-    
+    // additional params
     var PARAMS = "&tsyms=USD&api_key="
-    
-    var API_KEY = "6301b3769e6f7fae08fb501ccd093d5800176099bef6a1e5939a44c1b889c98c"
+    // 
+    var API_KEY = MY_API_KEY
 
     override func viewDidLoad() {
         super.viewDidLoad()
