@@ -29,29 +29,32 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
     var URL = "https://min-api.cryptocompare.com/data/pricemulti?fsyms="
     // additional params
     var PARAMS = "&tsyms=USD&api_key="
-    // 
+    // use your own api keys!
     var API_KEY = MY_API_KEY
 
     override func viewDidLoad() {
         super.viewDidLoad()
         // Do any additional setup after loading the view, typically from a nib.
+        
         cryptoTableView.dataSource = self
 
         addNewCryptoTextField.delegate = self
         
+        // this tap gesture will be on the table
         let tapGesture = UITapGestureRecognizer(target: self, action: #selector(tableViewTapped))
-
+        // add this gesture for hiding keyboard if outside of text field is tapped
         cryptoTableView.addGestureRecognizer(tapGesture)
-
+        // register the custom cells with their identifier
         cryptoTableView.register(UINib(nibName: "TableViewCell", bundle: nil), forCellReuseIdentifier: "customMessageCell")
+        
         getCryptos()
     }
-    
+    // return the count of the rows we need to display
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         print("count: \(cryptoList.count)")
         return cryptoList.count
     }
-    
+    // initialize the custom cells
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         
         let cell = tableView.dequeueReusableCell(withIdentifier: "customMessageCell", for: indexPath) as! TableViewCell
@@ -62,6 +65,27 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
         cell.price.text = cellData.price
         cell.price.sizeToFit()
         return cell
+    }
+    
+    // methods for swiping table cells to delete
+    func tableView(_ tableView: UITableView, canEditRowAt indexPath: IndexPath) -> Bool {
+        return true
+    }
+    // this function will actually delete the cell
+    func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCell.EditingStyle, forRowAt indexPath: IndexPath) {
+        if(editingStyle == .delete){
+            // get the name of the crytocurrency at the selected row
+            let currentCrypto = cryptoList[indexPath.row].name
+            // search the name in cryptoNamesList array and remove the found index
+            for i in 0..<cryptoNamesList.count {
+                if(cryptoNamesList[i] == currentCrypto) {
+                    cryptoNamesList.remove(at: i)
+                    break
+                }
+            }
+            // after the operation, update the list
+            getCryptos()
+        }
     }
     
     // get cryptocurrency data with Alamofire
@@ -95,7 +119,8 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
             self.cryptoTableView.reloadData()
         }
     }
-    
+    // when user starts editing the text field,
+    // increase the height of the bottom view because the keyboard will be present
     func textFieldDidBeginEditing(_ textField: UITextField) {
         UIView.animate(withDuration: 0.5){
             self.addCryptoTextFieldHeight.constant = 308
@@ -103,14 +128,14 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
         }
         
     }
-
+    // when editing is complete, revert the height of the bottom view
     func textFieldDidEndEditing(_ textField: UITextField) {
         UIView.animate(withDuration: 0.5){
             self.addCryptoTextFieldHeight.constant = 50
             self.view.layoutIfNeeded()
         }
     }
-
+    // after user enters the text and taps done, perform the action
     func textFieldShouldReturn(_ textField: UITextField) -> Bool {
         
         if let newCrypto = addNewCryptoTextField.text?.trimmingCharacters(in: .whitespacesAndNewlines).uppercased() {
@@ -124,7 +149,7 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
         }
         return true
     }
-    
+    // if user taps outside the text field before returning, hide the keyboard
     @objc func tableViewTapped()
     {
         addNewCryptoTextField.endEditing(true)
