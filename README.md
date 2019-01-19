@@ -7,7 +7,7 @@ The app automatically updates the values for the coins.
 Instead of updating all of the coin's list, only the ones that have a price difference are updated.
 Cells are animated for addition, deletion and updates.
 
-![alt text](https://drive.google.com/open?id=1cFfG1N2nSTHoRxpuAeBXLZZK1oDFXTcm)
+![alt text](https://ibb.co/10wZdxP)
 ## Pods
 The pods that are used : 
 - Alamofire for API requests
