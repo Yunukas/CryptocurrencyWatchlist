@@ -6,6 +6,7 @@
 //  Copyright © 2019 YJ. All rights reserved.
 //
 
-// Cryptos should always be in order, when new one is added, order is changed
-// Auto refresh for prices
+// Add crypto icons
+// Add daily change percentage label
+// Pull down to refresh
 

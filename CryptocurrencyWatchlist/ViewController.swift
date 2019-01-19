@@ -13,7 +13,6 @@ import SwiftyJSON
 class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSource, UITextFieldDelegate {
     
     var cryptoList = [Crypto]()
-    var cryptoNamesList : [String] = ["ETH","BTC","LTC"]
     
     
     /*
@@ -29,7 +28,8 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
     
     @IBOutlet weak var emptyListLabel: UILabel!
     
-    
+    // update interval in seconds
+    let updateInterval : Double = 5.0
     // URL of the API
     var URL = "https://min-api.cryptocompare.com/data/pricemulti?fsyms="
     // additional params
@@ -55,13 +55,17 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
         // register the custom cells with their identifier
         cryptoTableView.register(UINib(nibName: "TableViewCell", bundle: nil), forCellReuseIdentifier: "customMessageCell")
         
-        getPrice(cryptoName: "ETH")
+        // timer function to update the prices every specified updateInterval
+        _ = Timer.scheduledTimer(withTimeInterval: updateInterval, repeats: true) { timer in
+            print("timer fired \(Date())")
+            self.updatePrices()
+        }
     }
     // return the count of the rows we need to display
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
 //        print("count: \(cryptoList.count)")
         if(cryptoList.count == 0){
-            emptyListLabel.text = "You have no cryptocurrency in your list. Add some!"
+            emptyListLabel.text = "You have no cryptocurrency in your list. Add some! i.e. type: BTC"
             emptyListLabel.isHidden = false
             self.cryptoTableView.backgroundView = emptyListLabel
             return 0
@@ -100,56 +104,16 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
             for i in 0..<cryptoList.count {
                 if(cryptoList[i].name == currentCrypto) {
                     cryptoList.remove(at: i)
+                    let indexPath = IndexPath(row: i, section: 0)
+                    cryptoTableView.deleteRows(at: [indexPath], with: .left)
                     break
                 }
             }
-            // after the operation, update the list
-//            getCryptos()
-            cryptoTableView.reloadData()
+
+           // cryptoTableView.reloadData()
         }
     }
-    
-    // get cryptocurrency data with the help of Alamofire
-    func getCryptos()
-    {
-        // check if the name array has some elements, so we would make a proper api call
-        if(!cryptoList.isEmpty){
-            // clear the objects because we query them again and refresh the cells
-            //cryptoList.removeAll()
-            
-            // clear list is empty message each time
-            emptyListLabel.text = ""
-            
-            // construct the parameters for the URL with coin names
-            var cryptoParams = ""
-            
-            for i in 0..<cryptoList.count {
-                cryptoParams += cryptoList[i].name
-                
-                if(i < cryptoList.count - 1){
-                    cryptoParams += ","
-                }
-                
-            }
-            
-            let fullURL = URL + cryptoParams + PARAMS + API_KEY
-        
-            Alamofire.request(fullURL).responseJSON { response in
-            
-                if response.result.isSuccess {
-                    let json : JSON = JSON(response.result.value!)
-                    
-                    for (key, value) in json {
-                        let name : String = key
-                        let price : String = value["USD"].stringValue
-                        self.cryptoList.append(Crypto(name: name, price: price))
-                    }
-                }
-                // reload the table
-                self.cryptoTableView.reloadData()
-            }
-        }
-    }
+
     // if user taps outside the text field before returning, hide the keyboard
     @objc func tableViewTapped()
     {
@@ -179,13 +143,13 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
                 addNewCryptoTextField.resignFirstResponder()
 
                 addNewCryptoTextField.text = ""
-                getPrice(cryptoName: newCrypto)
+                addPrice(cryptoName: newCrypto)
 
             }
         return true
     }
     // this function gets the price for a given crytocurrency
-    func getPrice(cryptoName: String){
+    func addPrice(cryptoName: String){
         // construct the parameters for the URL with coin names
         let cryptoParams = cryptoName
         
@@ -205,8 +169,6 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
                     // add the new crypto to the table
                     self.addNewCrypto()
                 }
-//                print(json)
-
             }
         }
     }
@@ -214,14 +176,55 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
     
     func addNewCrypto()
     {
-        print("here")
         cryptoTableView.beginUpdates()
-//                    for i in cryptoList {
-//                        print(i.name)
-//                    }
         cryptoTableView.insertRows(at: [IndexPath(row: (cryptoList.count-1) , section: 0)], with: .automatic)
-        
         cryptoTableView.endUpdates()
+    }
+    
+    // this function will query the API to update prices of coins in the cryptoList array
+    func updatePrices(){
+        
+        // first get the name of all cryptos in the array to form the url parameters
+        var cryptoParams = ""
+        for i in 0..<cryptoList.count {
+            cryptoParams += cryptoList[i].name
+            
+            if(i < cryptoList.count - 1){
+                cryptoParams += ","
+            }
+            
+        }
+        // construct the full url
+        let fullURL = URL + cryptoParams + PARAMS + API_KEY
+        
+        // get the bulk data from API
+        Alamofire.request(fullURL).responseJSON { response in
+            
+            if response.result.isSuccess {
+                let json : JSON = JSON(response.result.value!)
+                print(json)
+                if(json["Response"] != "Error"){
+                    for (key, value) in json {
+                        let name : String = key
+                        let price : String = value["USD"].stringValue
+                        
+                        // find the index of the coins whose price has changed
+                        if let index = self.cryptoList.firstIndex(where: {$0.name == name && $0.price != price}){
+                            
+                            // update the array with the new price
+                            self.cryptoList[index].price = price
+                            
+                            // animate the updated coin's row
+                            let indexPath = IndexPath(item: index, section: 0)
+                            self.cryptoTableView.reloadRows(at: [indexPath], with: .top)
+                        }
+                        
+                    }
+                }
+                //                print(json)
+            }
+        }
+     
     }
     
 }
