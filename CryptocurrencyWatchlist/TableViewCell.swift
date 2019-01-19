@@ -12,6 +12,7 @@ class TableViewCell: UITableViewCell {
 
     @IBOutlet var name: UILabel!
     @IBOutlet var price: UILabel!
+    @IBOutlet weak var dailyChangePercentage: UILabel!
     
     override func awakeFromNib() {
         super.awakeFromNib()

@@ -11,10 +11,12 @@ import Foundation
 class Crypto {
     var name : String = ""
     var price : String = ""
+    var dailyChangePercentage : String = ""
     
-    init(name : String, price : String)
+    init(name : String, price : String, dailyChangePercentage: String)
     {
         self.name = name
         self.price = price
+        self.dailyChangePercentage = dailyChangePercentage
     }
 }

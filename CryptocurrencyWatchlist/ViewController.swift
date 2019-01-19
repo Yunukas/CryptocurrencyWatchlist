@@ -31,7 +31,7 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
     // update interval in seconds
     let updateInterval : Double = 5.0
     // URL of the API
-    var URL = "https://min-api.cryptocompare.com/data/pricemulti?fsyms="
+    var URL = "https://min-api.cryptocompare.com/data/pricemultifull?fsyms="
     // additional params
     var PARAMS = "&tsyms=USD&api_key="
     // use your own api keys!
@@ -55,24 +55,31 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
         // register the custom cells with their identifier
         cryptoTableView.register(UINib(nibName: "TableViewCell", bundle: nil), forCellReuseIdentifier: "customMessageCell")
         
+        emptyListLabel.text = "You have no cryptocurrency in your list. Add some! i.e. type: BTC"
+        cryptoTableView.backgroundView = emptyListLabel
+//        cryptoTableView.separatorColor = UIColor.red
+        
+//        cryptoTableView.rowHeight = UITableView.automaticDimension
+//        cryptoTableView.estimatedRowHeight = 600
         // timer function to update the prices every specified updateInterval
         _ = Timer.scheduledTimer(withTimeInterval: updateInterval, repeats: true) { timer in
-            print("timer fired \(Date())")
+//            print("timer fired \(Date())")
             self.updatePrices()
         }
+
     }
     // return the count of the rows we need to display
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
 //        print("count: \(cryptoList.count)")
         if(cryptoList.count == 0){
-            emptyListLabel.text = "You have no cryptocurrency in your list. Add some! i.e. type: BTC"
-            emptyListLabel.isHidden = false
-            self.cryptoTableView.backgroundView = emptyListLabel
+            cryptoTableView.separatorStyle = UITableViewCell.SeparatorStyle.none
+            cryptoTableView.backgroundView?.isHidden = false
             return 0
         }
         else {
-            emptyListLabel.text = ""
-            emptyListLabel.isHidden = true
+            cryptoTableView.separatorStyle = UITableViewCell.SeparatorStyle.init(rawValue: 1)!
+            cryptoTableView.separatorColor = UIColor.lightGray
+            cryptoTableView.backgroundView?.isHidden = true
             return cryptoList.count
         }
     }
@@ -84,7 +91,8 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
         let cellData = cryptoList[indexPath.row]
         
         cell.name.text = cellData.name
-        cell.price.text = cellData.price
+        cell.price.text = "\(cellData.price) $"
+        cell.dailyChangePercentage.text = "\(cellData.dailyChangePercentage) %"
         cell.price.sizeToFit()
         return cell
     }
@@ -101,14 +109,21 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
             // get the name of the crytocurrency at the selected row
             let currentCrypto = cryptoList[indexPath.row].name
             // search the name in cryptoNamesList array and remove the found index
-            for i in 0..<cryptoList.count {
-                if(cryptoList[i].name == currentCrypto) {
-                    cryptoList.remove(at: i)
-                    let indexPath = IndexPath(row: i, section: 0)
-                    cryptoTableView.deleteRows(at: [indexPath], with: .left)
-                    break
-                }
+            
+            if let index = cryptoList.firstIndex(where: {$0.name == currentCrypto}){
+                cryptoList.remove(at: index)
+                let indexPath = IndexPath(row: index, section: 0)
+                cryptoTableView.deleteRows(at: [indexPath], with: .left)
             }
+            
+//            for i in 0..<cryptoList.count {
+//                if(cryptoList[i].name == currentCrypto) {
+//                    cryptoList.remove(at: i)
+//                    let indexPath = IndexPath(row: i, section: 0)
+//                    cryptoTableView.deleteRows(at: [indexPath], with: .left)
+//                    break
+//                }
+//            }
 
            // cryptoTableView.reloadData()
         }
@@ -117,7 +132,9 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
     // if user taps outside the text field before returning, hide the keyboard
     @objc func tableViewTapped()
     {
-        addNewCryptoTextField.endEditing(true)
+        if addNewCryptoTextField.isEditing {
+            addNewCryptoTextField.endEditing(true)
+        }
     }
     // when user starts editing the text field,
     // increase the height of the bottom view because the keyboard will be present
@@ -159,13 +176,16 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
             
             if response.result.isSuccess {
                 let json : JSON = JSON(response.result.value!)
+                print(json)
                 if(json["Response"] != "Error"){
-                    for (key, value) in json {
-                        let name : String = key
-                        let price : String = value["USD"].stringValue
-                        self.cryptoList.append(Crypto(name: name, price: price))
-                        
-                    }
+//                    for (key, value) in json {
+                    
+                        let name : String = json["RAW"][cryptoName]["USD"]["FROMSYMBOL"].stringValue
+                        let price : String = json["RAW"][cryptoName]["USD"]["PRICE"].stringValue
+                        let dailyChangePercentage : String = json["DISPLAY"][cryptoName]["USD"]["CHANGEPCTDAY"].stringValue
+                        self.cryptoList.append(Crypto(name: name, price: price, dailyChangePercentage: dailyChangePercentage))
+                        print("name: \(name) price: \(price) daily: \(dailyChangePercentage)")
+//                    }
                     // add the new crypto to the table
                     self.addNewCrypto()
                 }
@@ -204,22 +224,25 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
                 let json : JSON = JSON(response.result.value!)
                 print(json)
                 if(json["Response"] != "Error"){
-                    for (key, value) in json {
-                        let name : String = key
-                        let price : String = value["USD"].stringValue
-                        
+//                    for (key, value) in json {
+                    for i in self.cryptoList {
+                    let name : String = json["RAW"][i.name]["USD"]["FROMSYMBOL"].stringValue
+                    let price : String = json["RAW"][i.name]["USD"]["PRICE"].stringValue
+                    let dailyChangePercentage : String = json["DISPLAY"][i.name]["USD"]["CHANGEPCTDAY"].stringValue
+//                    self.cryptoList.append(Crypto(name: name, price: price, dailyChangePercentage: dailyChangePercentage))
+                    
                         // find the index of the coins whose price has changed
                         if let index = self.cryptoList.firstIndex(where: {$0.name == name && $0.price != price}){
                             
                             // update the array with the new price
                             self.cryptoList[index].price = price
-                            
+                            self.cryptoList[index].dailyChangePercentage = dailyChangePercentage
                             // animate the updated coin's row
                             let indexPath = IndexPath(item: index, section: 0)
                             self.cryptoTableView.reloadRows(at: [indexPath], with: .top)
                         }
-                        
                     }
+//                    }
                 }
                 //                print(json)
             }
